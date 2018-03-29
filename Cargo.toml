@@ -1,0 +1,11 @@
+[package]
+name = "yar-client-rust"
+version = "0.1.0"
+authors = ["guohao <guohao@panda.tv>"]
+
+[dependencies]
+curl = "0.4.11"
+json = "0.11.13"
+time = "0.1.39"
+error-chain = "0.11.0"
+snowflake-multi-threaded = "0.1.1"
