@@ -35,7 +35,9 @@ pub  struct YarRequest<'a>{
 ///
 /// When a server response a result, it will send the struct
 ///
-pub struct YarResponse <'a,T: ?Sized>{
+pub struct YarResponse <'a,T>
+    where T:Sized
+{
     id: u64,
     stats: &'a str,
     ret: T,
