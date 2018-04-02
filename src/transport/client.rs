@@ -12,10 +12,9 @@ use std::num::{ParseIntError};
 use std::result;
 use std::sync::Arc;
 use std::error;
-use std::io::{stdin, Read};
+use std::io::{Read};
 use std::cell::RefCell;
-use std::borrow::BorrowMut;
-
+use std::rc::Rc;
 
 pub const YAR_OPT_PACKAGER:u8 = 1 << 0;
 pub const YAR_OPT_PERSISTENT:u8 = 1 << 1;
@@ -45,7 +44,19 @@ pub struct YaClient{
 
 
 impl YaClient{
-    pub fn call(&mut self,fn_name:&str, parameters:Arc<&[String]>){
+    /// Call a `Yar` method
+    /// `parameters` can only use string slice Arc, and it will be return a [`Response`]: struct.Response.html value.
+    /// Example:
+    ///`rust
+    /// let client = Builder::default()
+    /// .setUrl("http://10limi.com/rpc1.php").unwrap()
+    /// .setOpt(YAR_OPT_PACKAGER,"JSON").unwrap()
+    /// .build().unwrap();
+    ///
+    /// client.call("test",Arc::new(&["1".to_string(),"2".to_string()]));
+    ///`
+    ///
+    pub fn call(&mut self,fn_name:&str, parameters:Arc<&[String]>) -> Rc<RefCell<Vec<u8>>> {
         self.curl_client.post(true);
         let mut transfer = self.curl_client.transfer();
 
@@ -54,13 +65,14 @@ impl YaClient{
             Ok(data_to_upload.read(into).unwrap())
         }).unwrap();
 
-        let mut data_from_resp = RefCell::new(Vec::<u8>::new());
-        transfer.write_function(   move |data| unsafe {
-            data_from_resp.borrow_mut().extend_from_slice(data);
+        let data_from_resp = Rc::new(RefCell::new(Vec::<u8>::new()));
+        let data_from_resp_rc = data_from_resp.clone();
+        transfer.write_function(  move |data|  {
+            data_from_resp_rc.borrow_mut().extend_from_slice(data);
             Ok(data.len())
         }).unwrap();
         transfer.perform().unwrap();
-        println!("{:?}",data_from_resp);
+        data_from_resp
     }
 }
 
@@ -68,7 +80,7 @@ impl YaClient{
 
 impl Builder{
 
-    fn setUrl(mut self,url:&str) -> Result<Builder>{
+    pub fn setUrl(mut self,url:&str) -> Result<Builder>{
         if url.is_empty() || (!url.starts_with("http") &&  !url.starts_with("https")){
            return Err(YarError::URLError("url must be contains http or https"));
         }
@@ -76,7 +88,7 @@ impl Builder{
         Ok(self)
     }
 
-    fn setOpt(mut self, name:u8, value:&str) ->Result<Builder>{
+    pub fn setOpt(mut self, name:u8, value:&str) -> Result<Builder>{
         if name.eq(&YAR_OPT_TIMEOUT){
             self.clientConf.timeout = value.to_string().parse::<i64>()?;
         }
@@ -180,15 +192,15 @@ impl fmt::Display for YarError{
     }
 }
 
-fn test_builder_fn() -> Result<YaClient>{
-    Ok(Builder::default()
-        .setUrl("http://10limi.com/rpc.php")?
-        .setOpt(YAR_OPT_PACKAGER,"JSON")?
-        .build()?)
-}
+
 #[test]
-fn test_builder(){
-    let mut client = test_builder_fn().unwrap();
-    client.call("test",Arc::new(&["1".to_string(),"2".to_string()]));
-    //let test = client.call("test",(1));
+fn test_builder() {
+    let mut client = Builder::default()
+        .setUrl("http://10limi.com/rpc1.php").unwrap()
+        .setOpt(YAR_OPT_PACKAGER,"JSON").unwrap()
+        .build().unwrap();
+    let a = client.call("test",Arc::new(&["1".to_string(),"2".to_string()]));
+    println!("===={:?}===",a.borrow());
+    println!("{}","a");
+
 }

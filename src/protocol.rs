@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use std::vec::Vec;
-use std::marker::Sized;
 ///
 /// typedef struct _yar_header {
 ///   unsigned int   id;

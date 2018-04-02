@@ -9,6 +9,9 @@ pub mod protocol;
 pub mod transport;
 pub mod packager;
 
+pub use transport::client::{Builder,YaClient};
+
+#[allow(dead_code)]
 use snowflake_multi_threaded::SnowFlakeId;
 
 pub use protocol::{YarHeader,YarRequest,YarResponse};
