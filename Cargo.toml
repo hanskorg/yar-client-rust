@@ -1,15 +1,11 @@
 [package]
-name = "yar-client"
+name = "yar-client-rust"
 version = "0.1.0"
-repository = "https://github.com/hanskorg/yar-client-rust.git"
-homepage = "https://github.com/hanskorg/yar-client-rust.git"
-authors = ["hans <hans@hansk.org>"]
-license = "MIT"
-readme = "README.md"
-documentation = ""
-description = ""
+authors = ["guohao <guohao@panda.tv>"]
 
 [dependencies]
+curl = "0.4.11"
 json = "0.11.13"
-curl = "0.4.9"
-snowflake-multi-threaded = "^0.1.1"
+time = "0.1.39"
+error-chain = "0.11.0"
+snowflake-multi-threaded = "0.1.1"

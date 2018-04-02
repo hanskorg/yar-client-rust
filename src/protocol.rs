@@ -30,17 +30,15 @@ pub struct YarHeader{
 pub  struct YarRequest<'a>{
     id: u64,
     method: String,
-    paramters: Vec<&'a str>
+    parameters: Vec<&'a str>
 }
 ///
 /// When a server response a result, it will send the struct
 ///
-pub struct YarResponse <'a,T>
-    where T:Sized
-{
+pub struct YarResponse{
     id: u64,
-    stats: &'a str,
-    ret: T,
-    out_put: &'a str,
-    err: &'a str
+    status: String,
+    ret: String,
+    out_put: String,
+    err: String
 }
