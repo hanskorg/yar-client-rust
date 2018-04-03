@@ -2,7 +2,7 @@ extern crate yar_client;
 
 use yar_client::Builder;
 use yar_client::transport::client::YAR_OPT_PACKAGER;
-
+use yar_client::transport::request::YarRequest;
 use std::sync::Arc;
 
 fn main() {

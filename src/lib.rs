@@ -1,20 +1,26 @@
 extern crate curl;
+
+#[macro_use]
 extern crate json;
+
 extern crate snowflake_multi_threaded;
 extern crate time;
 #[macro_use]
 extern crate error_chain;
 
-pub mod protocol;
 pub mod transport;
-pub mod packager;
+mod packager;
+mod protocol;
 
-pub use transport::client::{Builder,YaClient};
+use transport::response::YarResponse;
+use transport::request::YarRequest;
+use packager::Packager;
+
+pub use transport::client::{Builder,YaClient,YarError};
 
 #[allow(dead_code)]
 use snowflake_multi_threaded::SnowFlakeId;
 
-pub use protocol::{YarHeader,YarRequest,YarResponse};
 
 mod errors {
     // Create the Error, ErrorKind, ResultExt, and Result types
