@@ -8,18 +8,19 @@ extern crate time;
 #[macro_use]
 extern crate error_chain;
 
+use std::result;
+
 pub mod transport;
+pub mod error;
+
 mod packager;
-mod protocol;
 
-use transport::response::YarResponse;
-use transport::request::YarRequest;
-use packager::Packager;
 
-pub use transport::client::{Builder,YaClient,YarError};
+pub use transport::client::{Builder,YarClient};
+pub use transport::client::{YAR_OPT_CONNECT_TIMEOUT,YAR_OPT_PACKAGER,YAR_OPT_PERSISTENT,YAR_OPT_TIMEOUT};
 
-#[allow(dead_code)]
-use snowflake_multi_threaded::SnowFlakeId;
+
+pub type Result<T> = result::Result<T,error::YarError>;
 
 
 mod errors {
@@ -29,6 +30,6 @@ mod errors {
 
 error_chain! {
     types {
-        Error, ErrorKind, ResultExt, Result;
+        Error, ErrorKind, ResultExt;
     }
 }

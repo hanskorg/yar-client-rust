@@ -28,8 +28,8 @@ pub struct YarHeader{
 
 
 pub fn encode(request:YarRequest)->Vec<u8>{
-    let mut bytes = Vec::<u8>::new();
-    let mut yarHeader = YarHeader{
+    let bytes = Vec::<u8>::new();
+    let mut yar_header = YarHeader{
         id:request.id as u32,
         version:1,
         magic_num:0x80DFEC60,
@@ -38,8 +38,7 @@ pub fn encode(request:YarRequest)->Vec<u8>{
         token:Default::default(),
         body_len:32,
     };
-    yarHeader.provider.copy_from_slice("ddd".as_bytes());
-    yarHeader.token.copy_from_slice("ddd".as_bytes());
-//    bytes.push(yarHeader.id.);
+    yar_header.provider.copy_from_slice("ddd".as_bytes());
+    yar_header.token.copy_from_slice("ddd".as_bytes());
     bytes
 }

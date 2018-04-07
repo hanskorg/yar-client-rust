@@ -5,7 +5,6 @@
 // except according to those terms.
 
 use curl::easy::Easy;
-use curl::Error;
 use time::Duration;
 
 use std::num::{ParseIntError};
@@ -15,23 +14,21 @@ use std::error;
 use std::io::{Read};
 use std::cell::RefCell;
 use std::rc::Rc;
-use packager::Packager;
-use packager::JSONPackager;
-use transport::request::YarRequest;
-use transport::response::YarResponse;
+
+use error::YarError;
+use Result;
 
 pub const YAR_OPT_PACKAGER:u8 = 1 << 0;
 pub const YAR_OPT_PERSISTENT:u8 = 1 << 1;
 pub const YAR_OPT_TIMEOUT:u8 =  1<< 2;
 pub const YAR_OPT_CONNECT_TIMEOUT:u8 = 1<< 3;
 
-type Result<T> = result::Result<T,YarError>;
 
 pub struct Builder{
-    clientConf:YaClientConf
+    client_conf:YarClientConf
 }
 #[derive(Clone, Default)]
-struct YaClientConf{
+struct YarClientConf{
     url:String,
     timeout:i64,
     connect_timeout:i64,
@@ -41,16 +38,11 @@ struct YaClientConf{
     provider:[char;32],
 
 }
-pub struct YaClient<T>
-    where T:Packager
-{
+pub struct YarClient {
     curl_client:Easy,
-    packager:Box<T>
 }
 
-impl <T> YaClient<T>
-    where T:Packager
-{
+impl YarClient {
     /// Call a `Yar` method
     /// `parameters` can only use string slice Arc, and it will be return a [`Response`]: struct.Response.html value.
     /// Example:
@@ -60,8 +52,8 @@ impl <T> YaClient<T>
     ///     use yar_client::Builder;
     ///     use yar_client::transport::client::YAR_OPT_PACKAGER;
     ///     let mut client = Builder::default()
-    ///     .setUrl("http://10limi.com/rpc1.php").unwrap()
-    ///     .setOpt(YAR_OPT_PACKAGER,"JSON").unwrap()
+    ///     .set_url("http://10limi.com/rpc1.php").unwrap()
+    ///     .set_opt(YAR_OPT_PACKAGER,"JSON").unwrap()
     ///     .build().unwrap();
     ///
     ///     client.call("test",Arc::new(&["1".to_string(),"2".to_string()]));
@@ -72,7 +64,6 @@ impl <T> YaClient<T>
         let mut transfer = self.curl_client.transfer();
 
         let mut data_to_upload = &b"foobar"[..];
-        self.encoder;
         transfer.read_function(move |into| {
             Ok(data_to_upload.read(into).unwrap())
         }).unwrap();
@@ -84,6 +75,9 @@ impl <T> YaClient<T>
             Ok(data.len())
         }).unwrap();
         transfer.perform().unwrap();
+
+        println!("call {} - {:?}", fn_name, parameters);
+
         data_from_resp
     }
 }
@@ -95,11 +89,11 @@ impl Builder{
     /// Set Yar Api address
     /// **http or https only**
     ///
-    pub fn setUrl(mut self,url:&str) -> Result<Builder>{
+    pub fn set_url(mut self,url:&str) -> Result<Builder>{
         if url.is_empty() || (!url.starts_with("http") &&  !url.starts_with("https")){
            return Err(YarError::URLError("url must be contains http or https"));
         }
-        self.clientConf.url = url.to_string();
+        self.client_conf.url = url.to_string();
         Ok(self)
     }
     /// Set Request Options
@@ -108,40 +102,41 @@ impl Builder{
     /// - [x] YAR_OPT_TIMEOUT unit second , transport timeout
     /// - [x] YAR_OPT_CONNECT_TIMEOUT unit second ,TCP connect timeout
     ///
-    pub fn setOpt(mut self, name:u8, value:&str) -> Result<Builder>{
+    pub fn set_opt(mut self, name:u8, value:&str) -> Result<Builder>{
         if name.eq(&YAR_OPT_TIMEOUT){
-            self.clientConf.timeout = value.to_string().parse::<i64>()?;
+            self.client_conf.timeout = value.to_string().parse::<i64>()?;
         }
         if name.eq(&YAR_OPT_CONNECT_TIMEOUT){
-            self.clientConf.connect_timeout = value.to_string().parse::<i64>()?;
+            self.client_conf.connect_timeout = value.to_string().parse::<i64>()?;
         }
         if name.eq(&YAR_OPT_PACKAGER){
-            self.clientConf.packger_name = value.to_string();
+            self.client_conf.packger_name = value.to_string();
         }
         Ok(self)
     }
     ///Build a new YarClient ,Transport with curl
-    ///```
+    ///```rust
+    ///  use yar_client::Builder;
+    ///  use yar_client::transport::client::YAR_OPT_PACKAGER;
+    ///
     ///  Builder::default()
-    ///  .setUrl("http://10limi.com/rpc.php")
-    ///  .setOpt(YAR_OPT_PACKAGER,"JSON").build();
+    ///  .set_url("http://10limi.com/rpc.php").unwrap()
+    ///  .set_opt(YAR_OPT_PACKAGER,"JSON").unwrap().build();
     ///```
     ///
-    pub fn build(mut self) -> Result<YaClient> {
-        let packager = JSONPackager{};
+    pub fn build(self) -> Result<YarClient> {
 
-        let mut client = YaClient{
+        let mut client = YarClient{
             curl_client:Easy::new(),
-            packager:Box::new(JSONPackager{})
         };
-        client.curl_client.url(self.clientConf.url.as_ref());
-        if self.clientConf.timeout > 0 {
-            client.curl_client.timeout(Duration::seconds(self.clientConf.timeout).to_std().unwrap());
+        client.curl_client.url(self.client_conf.url.as_ref())?;
+        if self.client_conf.timeout > 0 {
+            client.curl_client.timeout(Duration::seconds(self.client_conf.timeout).to_std().unwrap())?;
         }
-        if self.clientConf.connect_timeout > 0 {
-            client.curl_client.connect_timeout(Duration::seconds(self.clientConf.connect_timeout).to_std().unwrap());
+        if self.client_conf.connect_timeout > 0 {
+            client.curl_client.connect_timeout(Duration::seconds(self.client_conf.connect_timeout).to_std().unwrap())?;
         }
-        client.curl_client.url(self.clientConf.url.as_ref())?;
+        client.curl_client.url(self.client_conf.url.as_ref())?;
         Ok(client)
     }
 }
@@ -149,7 +144,7 @@ impl Builder{
 impl Default for Builder{
     fn default() -> Self {
         Builder{
-            clientConf : YaClientConf{
+            client_conf : YarClientConf{
                 timeout: 0,
                 connect_timeout: 0,
                 ..Default::default()
@@ -159,68 +154,12 @@ impl Default for Builder{
 }
 
 
-/// Error in [`Client`] calls
-///
-/// [`Client`]: struct.YaClient.html
-///
-#[derive(Debug)]
-pub enum YarError {
-    /// Error when url not contains http or https
-    URLError(&'static str),
-    /// The underlying error is num::ParseIntError.
-    TimeError(ParseIntError),
-    CURLError(Error),
-
-}
-
-impl From<ParseIntError> for YarError{
-    fn from(err:ParseIntError) -> YarError {
-        YarError::TimeError(err)
-    }
-}
-
-impl From<Error> for YarError{
-    fn from(err: Error) -> YarError {
-        YarError::CURLError(err)
-    }
-}
-
-impl error::Error for YarError{
-    fn description(&self) -> &str {
-        match *self {
-            YarError::TimeError(ref err) => err.description(),
-            YarError::CURLError(ref err) => err.description(),
-            YarError::URLError(description) => description
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            YarError::URLError(_) => None,
-            YarError::TimeError(ref err)=> Some(err as &error::Error),
-            YarError::CURLError(ref err)=> Some(err as &error::Error),
-        }
-    }
-}
-
-use std::fmt;
-
-impl fmt::Display for YarError{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            YarError::TimeError(ref err) => fmt::Display::fmt(err, f),
-            YarError::CURLError(ref err) => fmt::Display::fmt(err, f),
-            YarError::URLError(desc) => f.write_str(desc)
-        }
-    }
-}
-
 
 #[test]
 fn test_builder() {
     let mut client = Builder::default()
-        .setUrl("http://10limi.com/rpc1.php").unwrap()
-        .setOpt(YAR_OPT_PACKAGER,"JSON").unwrap()
+        .set_url("http://10limi.com/rpc1.php").unwrap()
+        .set_opt(YAR_OPT_PACKAGER,"JSON").unwrap()
         .build().unwrap();
     let a = client.call("test",Arc::new(&["1".to_string(),"2".to_string()]));
     println!("===={:?}===",a.borrow());

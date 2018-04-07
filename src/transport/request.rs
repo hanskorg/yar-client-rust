@@ -7,7 +7,6 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
-use snowflake_multi_threaded::SnowFlakeId;
 
 /// When a Client request a remote server, it will send a struct (in PHP):
 pub struct YarRequest<'a>{
