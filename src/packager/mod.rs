@@ -9,11 +9,16 @@ use Result;
 use std::vec::Vec;
 
 mod json_packager;
+mod msgpack_packager;
+
+pub use self::json_packager::JSONPackager;
+pub use self::msgpack_packager::MsgPackPackager;
+
 mod protocol;
 
 
-pub trait Packager:Sized{
-    fn pack(request:&YarRequest) -> Result<Vec<u8>>;
-    fn unpack( Vec<u8>) -> YarResponse;
+pub trait Packager {
+    fn pack(&self,request:&YarRequest) -> Result<Vec<u8>>;
+    fn unpack(&self, Vec<u8>) -> YarResponse;
 }
 

@@ -8,7 +8,7 @@ pub struct JSONPackager;
 
 impl Packager for JSONPackager{
 
-    fn pack(request: &YarRequest) -> Result<Vec<u8>> {
+    fn pack(&self, request: &YarRequest) -> Result<Vec<u8>> {
         let body = object!{
             "i" => request.id,
             "m" => "1",
@@ -17,7 +17,7 @@ impl Packager for JSONPackager{
         Ok(json::stringify(body).into_bytes())
     }
 
-    fn unpack(_content:Vec<u8>) -> YarResponse {
+    fn unpack(&self, _content:Vec<u8>) -> YarResponse {
         YarResponse{
             id: 0,
             status: String::new(),
