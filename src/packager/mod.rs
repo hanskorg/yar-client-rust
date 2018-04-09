@@ -3,13 +3,19 @@
 // <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
+
+mod json_packager;
+mod msgpack_packager;
+
+use bincode::serialize;
+
 use transport::request::YarRequest;
 use transport::response::YarResponse;
 use Result;
 use std::vec::Vec;
 
-mod json_packager;
-mod msgpack_packager;
+
+
 
 pub use self::json_packager::JSONPackager;
 pub use self::msgpack_packager::MsgPackPackager;
@@ -18,19 +24,25 @@ mod protocol;
 
 
 pub trait Packager {
-    fn pack(&self,request:&YarRequest) -> Result<Vec<u8>>;
+    fn pack(&self,request:&YarRequest) -> Vec<u8>;
     fn unpack(&self, Vec<u8>) -> YarResponse;
+    fn get_name(&self) ->Vec<u8>;
 }
 
-#[derive(Debug,Default)]
+#[derive(Serialize,Debug,Default)]
 pub struct YarHeader{
     pub id:       u32,
-    pub version:  u8,
+    pub version:  u16,
     pub magic_num:u32,
     pub reserved: u32,
     pub provider: [u8; 32],
     pub token:    [u8; 32],
     pub body_len: u32,
+}
+impl YarHeader {
+    pub fn get_bytes(&self) -> Vec<u8>{
+        serialize(&self).unwrap()
+    }
 }
 
 

@@ -7,6 +7,12 @@ extern crate snowflake_multi_threaded;
 extern crate time;
 #[macro_use]
 extern crate error_chain;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
+extern crate serde;
+extern crate bincode;
+
 
 use std::result;
 

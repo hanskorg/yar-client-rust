@@ -1,28 +1,38 @@
 use json;
 use packager::Packager;
 use Result;
-
+use serde_json;
 use transport::request::YarRequest;
 use transport::response::YarResponse;
 pub struct JSONPackager;
 
+#[derive(Serialize, Deserialize, Debug)]
+struct JsonBody{
+    i:u32,
+    m:String,
+    p:Vec<String>
+}
 impl Packager for JSONPackager{
 
-    fn pack(&self, request: &YarRequest) -> Result<Vec<u8>> {
-        let id = request.id.clone();
-        let method = request.method.clone();
-        let parameters = request.parameters.clone();
-        let body = object!{
-            "i" => id,
-            "m" => method,
-            "p" => parameters
+    fn pack(&self, request: &YarRequest) -> Vec<u8> {
+        let i = request.id.clone() as u32 ;
+        let m = request.method.clone();
+        let p = request.parameters.clone();
+//        let body = object!{
+//            "i" => id,
+//            "m" => method,
+//            "p" => parameters
+//        };
+        let json_body = JsonBody{
+            i,
+            m,
+            p
         };
-        Ok(json::stringify(body).into_bytes())
+        serde_json::to_string(&json_body).unwrap().into_bytes()
     }
 
     fn unpack(&self, _content:Vec<u8>) -> YarResponse {
         let json_str = String::from_utf8(_content).unwrap();
-        println!("{:?}",json::parse(json_str.as_ref()));
         YarResponse{
             id: 0,
             status: String::new(),
@@ -30,5 +40,8 @@ impl Packager for JSONPackager{
             out_put: String::new(),
             err: String::new(),
         }
+    }
+    fn get_name(&self) -> Vec<u8>{
+        String::from("JSON").into_bytes()
     }
 }

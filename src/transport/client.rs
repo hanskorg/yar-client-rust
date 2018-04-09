@@ -16,6 +16,7 @@ use time::Duration;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::boxed::Box;
+use std::io::{stdin, Read,Write};
 
 use error::YarError;
 use Result;
@@ -67,16 +68,23 @@ impl YarClient {
     pub fn call(&mut self,fn_name:&str, parameters:Vec<String>) -> Rc<RefCell<Vec<u8>>> {
         self.curl_client.post(true);
         let request  = YarRequest::new(self.snow_flake_id.generate_id().unwrap() as u64, fn_name.to_string(), parameters.clone());
-        let post_raw = request.encode(&self.packager, self.token.as_ref(), self.provider.as_ref()).unwrap();
+        let post_raw:Vec<u8> = request.encode(&self.packager, self.token.as_ref(), self.provider.as_ref()).unwrap();
 //        let mut data_to_upload = self.packager.pack(&request).unwrap();
 
-        let a = self.curl_client.send(post_raw.as_slice());
-        println!("==={:?}", a);
         let mut transfer = self.curl_client.transfer();
+
+        //self.curl_client.send(post_raw.as_slice());
+        transfer.read_function( |into|{
+            let a = post_raw.as_slice().read(into).unwrap();
+            println!("==req==={}=====",a);
+            Ok(a)
+        }).unwrap();
         let data_from_resp = Rc::new(RefCell::new(Vec::<u8>::new()));
         let data_from_resp_rc = data_from_resp.clone();
         transfer.write_function(  move |data|  {
             data_from_resp_rc.borrow_mut().extend_from_slice(data);
+            println!("===resp=={:?}=====",data);
+
             Ok(data.len())
         }).unwrap();
         transfer.perform().unwrap();

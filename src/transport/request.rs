@@ -10,11 +10,10 @@
 
 /// When a Client request a remote server, it will send a struct (in PHP):
 
-use packager::Packager;
-use packager::YarHeader;
-use std::boxed::Box;
-
+use packager::{YarHeader,Packager};
 use Result;
+
+use std::boxed::Box;
 
 #[derive(Debug)]
 pub struct YarRequest{
@@ -33,19 +32,26 @@ impl YarRequest{
     }
 
     pub fn encode(&self, packager:&Box<Packager>,token:&str, provider:&str )->Result<Vec<u8>>{
-        let raw_data = packager.pack(&self);
-        self.encode_header(raw_data.as_ref().unwrap().len() as u32,token, provider);
-        raw_data
+        let mut raw_data:Vec<u8> = packager.pack(&self);
+
+        let mut bytes   = self.encode_header(raw_data.len() as u32,token, provider);
+        println!("=header=={:?}===", bytes);
+        println!("=body=={:?}===", raw_data);
+        let mut packname = vec![0u8,8];
+        packname.append(packager.get_name().as_mut());
+        bytes.append(packname.as_mut());
+        bytes.append(raw_data.as_mut());
+        println!("=all=={:?}===", bytes);
+        Ok(bytes)
     }
 
     fn encode_header(&self,len:u32, token:&str, provider:&str )->Vec<u8>{
-        let mut bytes = Vec::<u8>::new();
         let mut yar_header = YarHeader{
             id:self.id as u32,
             version:1,
             magic_num:0x80DFEC60,
             reserved: 0,
-            body_len: 0,
+            body_len: len,
             ..Default::default()
         };
 
@@ -64,9 +70,7 @@ impl YarRequest{
             max_len = token_bytes.len();
         }
         yar_header.token[0..max_len].copy_from_slice(token_bytes);
-
-        println!("{:?}", yar_header);
-        bytes
+        yar_header.get_bytes()
     }
 
 }

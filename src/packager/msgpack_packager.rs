@@ -7,8 +7,8 @@ pub struct MsgPackPackager;
 
 impl Packager for MsgPackPackager{
 
-    fn pack(&self, request: &YarRequest) -> Result<Vec<u8>> {
-        Ok(vec![1u8])
+    fn pack(&self, request: &YarRequest) -> Vec<u8> {
+        vec![1u8]
     }
 
     fn unpack(&self, _content:Vec<u8>) -> YarResponse {
@@ -19,5 +19,9 @@ impl Packager for MsgPackPackager{
             out_put: String::new(),
             err: String::new(),
         }
+    }
+    fn get_name(&self) -> Vec<u8>{
+        String::from("MSGPACK").into_bytes()
+
     }
 }
