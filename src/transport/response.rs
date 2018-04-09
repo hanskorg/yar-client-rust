@@ -11,6 +11,7 @@
 ///
 /// When a server response a result, it will send the struct
 ///
+#[derive(Debug)]
 pub struct YarResponse{
     pub id: u64,
     pub status: String,

@@ -7,7 +7,6 @@
 use std::error;
 use std::num::ParseIntError;
 use curl::Error;
-use curl::easy::ReadError;
 
 /// Error in [`Client`] calls
 ///
@@ -20,8 +19,6 @@ pub enum YarError {
     /// The underlying error is num::ParseIntError.
     TimeError(ParseIntError),
     CURLError(Error),
-    ReadError(ReadError),
-
 }
 
 impl From<ParseIntError> for YarError{
@@ -33,11 +30,6 @@ impl From<ParseIntError> for YarError{
 impl From<Error> for YarError{
     fn from(err: Error) -> YarError {
         YarError::CURLError(err)
-    }
-}
-impl From<ReadError> for YarError{
-    fn from(err: ReadError) -> YarError {
-        YarError::ReadError(err)
     }
 }
 

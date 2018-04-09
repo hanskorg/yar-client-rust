@@ -22,3 +22,15 @@ pub trait Packager {
     fn unpack(&self, Vec<u8>) -> YarResponse;
 }
 
+#[derive(Debug,Default)]
+pub struct YarHeader{
+    pub id:       u32,
+    pub version:  u8,
+    pub magic_num:u32,
+    pub reserved: u32,
+    pub provider: [u8; 32],
+    pub token:    [u8; 32],
+    pub body_len: u32,
+}
+
+
