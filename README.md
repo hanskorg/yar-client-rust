@@ -2,7 +2,7 @@
 ## Introduction
     Yar Client for Rust-Lang
 
-[![Build Status](https://travis-ci.org/hanskorg/snowflake-rust.svg?branch=master)](https://travis-ci.org/hanskorg/snowflake-rust)
+[![Build Status](https://travis-ci.org/hanskorg/yar-client-rust.svg?branch=master)
 
 # Usage
 Add this to your `Cargo.toml`:
