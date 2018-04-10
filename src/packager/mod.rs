@@ -7,7 +7,7 @@
 mod json_packager;
 mod msgpack_packager;
 
-use bincode::serialize;
+use bincode::{config,serialize};
 
 use transport::request::YarRequest;
 use transport::response::YarResponse;
@@ -27,6 +27,9 @@ pub trait Packager {
     fn pack(&self,request:&YarRequest) -> Vec<u8>;
     fn unpack(&self, Vec<u8>) -> YarResponse;
     fn get_name(&self) ->Vec<u8>;
+//    fn encode(&self, request:&YarRequest, body:Vec<u8>)->Vec<u8>{
+//
+//    }
 }
 
 #[derive(Serialize,Debug,Default)]
@@ -41,7 +44,19 @@ pub struct YarHeader{
 }
 impl YarHeader {
     pub fn get_bytes(&self) -> Vec<u8>{
-        serialize(&self).unwrap()
+        config().big_endian().serialize(&self).unwrap()
+    }
+}
+#[derive(Serialize,Debug,Default)]
+pub struct YarProtocol{
+    pub header:YarHeader,
+    pub pack_name:[u8;8],
+    pub body:String
+}
+
+impl YarProtocol{
+    pub fn get_bytes(&self) -> Vec<u8>{
+        config().big_endian().serialize(&self).unwrap()
     }
 }
 

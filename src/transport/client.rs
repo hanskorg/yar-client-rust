@@ -76,7 +76,6 @@ impl YarClient {
         //self.curl_client.send(post_raw.as_slice());
         transfer.read_function( |into|{
             let a = post_raw.as_slice().read(into).unwrap();
-            println!("==req==={}=====",a);
             Ok(a)
         }).unwrap();
         let data_from_resp = Rc::new(RefCell::new(Vec::<u8>::new()));
@@ -133,14 +132,16 @@ impl <'a>Builder{
     }
     ///Set yar client Provider name, Default : yar_client_rust
     /// If provider's length long than 32 bytes, It will be truncated
-    pub fn set_provider(&mut self, provider:&str){
+    pub fn set_provider(mut self, provider:&str) -> Builder{
         self.client_conf.provider = provider.to_string();
+        self
     }
 
     ///Set yar client Token name, Default : yar_client_rust
     /// If provider's length long than 32 bytes, It will be truncated
-    pub fn set_token(&mut self, token:&str){
+    pub fn set_token(mut self, token:&str) -> Builder{
         self.client_conf.token = token.to_string();
+        self
     }
 
     ///Build a new YarClient ,Transport with curl

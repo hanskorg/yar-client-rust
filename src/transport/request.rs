@@ -10,8 +10,9 @@
 
 /// When a Client request a remote server, it will send a struct (in PHP):
 
-use packager::{YarHeader,Packager};
+use packager::{YarHeader,Packager,YarProtocol};
 use Result;
+use std::io::Write;
 
 use std::boxed::Box;
 
@@ -32,20 +33,29 @@ impl YarRequest{
     }
 
     pub fn encode(&self, packager:&Box<Packager>,token:&str, provider:&str )->Result<Vec<u8>>{
-        let mut raw_data:Vec<u8> = packager.pack(&self);
+        let raw_data:Vec<u8> = packager.pack(&self);
+        println!("==body=={:?}",raw_data);
+        let mut protocol = YarProtocol{
+            header: self.make_header(raw_data.len() as u32,token, provider),
+            pack_name:[0;8],
+            body: String::from_utf8(raw_data).unwrap()
+        };
+        protocol.pack_name[0..4].copy_from_slice("JSON".as_bytes());
+        let bytes = protocol.get_bytes();
+        println!("{:?}",bytes);
+//        let mut bytes   = self.encode_header(raw_data.len() as u32,token, provider);
+//        println!("=header=={:?}===", bytes);
+//        println!("=body=={:?}===", raw_data);
+//        let mut packname = vec![0u8;8];
+//
+//        bytes.append(packname.as_mut());
+//        bytes.append(raw_data.as_mut());
+//        println!("=all=={:?}===", bytes);
 
-        let mut bytes   = self.encode_header(raw_data.len() as u32,token, provider);
-        println!("=header=={:?}===", bytes);
-        println!("=body=={:?}===", raw_data);
-        let mut packname = vec![0u8,8];
-        packname.append(packager.get_name().as_mut());
-        bytes.append(packname.as_mut());
-        bytes.append(raw_data.as_mut());
-        println!("=all=={:?}===", bytes);
         Ok(bytes)
     }
 
-    fn encode_header(&self,len:u32, token:&str, provider:&str )->Vec<u8>{
+    fn make_header(&self, len:u32, token:&str, provider:&str )->YarHeader{
         let mut yar_header = YarHeader{
             id:self.id as u32,
             version:1,
@@ -70,7 +80,7 @@ impl YarRequest{
             max_len = token_bytes.len();
         }
         yar_header.token[0..max_len].copy_from_slice(token_bytes);
-        yar_header.get_bytes()
+        yar_header
     }
 
 }
