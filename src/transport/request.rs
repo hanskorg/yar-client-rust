@@ -33,31 +33,24 @@ impl YarRequest{
     }
 
     pub fn encode(&self, packager:&Box<Packager>,token:&str, provider:&str )->Result<Vec<u8>>{
-        let raw_data:Vec<u8> = packager.pack(&self);
-        println!("==body=={:?}",raw_data);
+        let mut raw_data:Vec<u8> = packager.pack(&self);
+        //println!("==body=={:?}",raw_data);
         let mut protocol = YarProtocol{
-            header: self.make_header(raw_data.len() as u32,token, provider),
+            header: self.make_header(raw_data.len() as i32,token, provider),
             pack_name:[0;8],
-            body: String::from_utf8(raw_data).unwrap()
+            body: raw_data
         };
         protocol.pack_name[0..4].copy_from_slice("JSON".as_bytes());
-        let bytes = protocol.get_bytes();
-        println!("{:?}",bytes);
-//        let mut bytes   = self.encode_header(raw_data.len() as u32,token, provider);
-//        println!("=header=={:?}===", bytes);
-//        println!("=body=={:?}===", raw_data);
-//        let mut packname = vec![0u8;8];
-//
-//        bytes.append(packname.as_mut());
-//        bytes.append(raw_data.as_mut());
-//        println!("=all=={:?}===", bytes);
+        let mut  bytes = protocol.get_bytes();
+        //bytes.append(raw_data.as_mut());
 
+        println!("===all=={:?}",bytes);
         Ok(bytes)
     }
 
-    fn make_header(&self, len:u32, token:&str, provider:&str )->YarHeader{
+    fn make_header(&self, len:i32, token:&str, provider:&str )->YarHeader{
         let mut yar_header = YarHeader{
-            id:self.id as u32,
+            id:1,
             version:1,
             magic_num:0x80DFEC60,
             reserved: 0,

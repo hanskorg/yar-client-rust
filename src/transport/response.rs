@@ -11,11 +11,11 @@
 ///
 /// When a server response a result, it will send the struct
 ///
-#[derive(Debug)]
+#[derive(Deserialize, Debug)]
 pub struct YarResponse{
-    pub id: u64,
-    pub status: String,
-    pub ret: String,
-    pub out_put: String,
-    pub err: String
+    pub i: i32,
+    pub s: i32,
+//    pub r: i32,
+//    pub o: String,
+//    pub e: String
 }

@@ -13,6 +13,6 @@ fn main() {
         .set_provider("org.hansk.net.yarclient")
         .build().unwrap();
     let a = client.call("test", vec!["1".to_string(), "2".to_string()]);
-    println!("===={:?}===",a);
-    println!("{}","a");
+    //println!("===={:?}===",a);
+    //println!("{}","a");
 }

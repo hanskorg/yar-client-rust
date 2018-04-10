@@ -8,9 +8,11 @@ use transport::request::YarRequest;
 use packager::MsgPackPackager;
 use packager::JSONPackager;
 use packager::Packager;
+use packager::YarProtocol;
 
 use snowflake_multi_threaded::SnowFlakeId;
 use curl::easy::Easy;
+//use http::{Request, Response};
 use time::Duration;
 
 use std::cell::RefCell;
@@ -65,34 +67,34 @@ impl YarClient {
     ///    let a = client.call("test",vec!["1".to_string(),"2".to_string()]);
     ///```
     ///
-    pub fn call(&mut self,fn_name:&str, parameters:Vec<String>) -> Rc<RefCell<Vec<u8>>> {
-        self.curl_client.post(true);
+    pub fn call(&mut self,fn_name:&str, parameters:Vec<String>) {
         let request  = YarRequest::new(self.snow_flake_id.generate_id().unwrap() as u64, fn_name.to_string(), parameters.clone());
         let post_raw:Vec<u8> = request.encode(&self.packager, self.token.as_ref(), self.provider.as_ref()).unwrap();
-//        let mut data_to_upload = self.packager.pack(&request).unwrap();
+        let mut resp_raw:RefCell<Vec<u8>>  = RefCell::new(Vec::new());
+        self.curl_client.post(true).unwrap();
+        self.curl_client.post_field_size(post_raw.len() as u64).unwrap();
 
         let mut transfer = self.curl_client.transfer();
 
-        //self.curl_client.send(post_raw.as_slice());
-        transfer.read_function( |into|{
-            let a = post_raw.as_slice().read(into).unwrap();
+        transfer.read_function(|buf| {
+            let a = post_raw.as_slice().read(buf).unwrap_or(0);
             Ok(a)
         }).unwrap();
-        let data_from_resp = Rc::new(RefCell::new(Vec::<u8>::new()));
-        let data_from_resp_rc = data_from_resp.clone();
-        transfer.write_function(  move |data|  {
-            data_from_resp_rc.borrow_mut().extend_from_slice(data);
-            println!("===resp=={:?}=====",data);
 
+        transfer.write_function( |data|  {
+            resp_raw.borrow_mut().extend_from_slice(data);
             Ok(data.len())
         }).unwrap();
         transfer.perform().unwrap();
+        //println!("{:?}",resp_raw.borrow());
+        //println!("{}", self.curl_client.response_code().unwrap());
 
+        // println!("==resp=={:?}",resp_raw.as_slice());
         // transfer.perform().unwrap();
-
+        let protocol = YarProtocol::to_protocol((resp_raw.borrow().to_vec()));
+        self.packager.unpack(protocol.body);
         // println!("call {} - {:?}", fn_name, parameters);
-        println!("{:?}",self.packager.unpack(data_from_resp.borrow().to_vec()));
-        data_from_resp
+        //println!("{:?}",self.packager.unpack(data_from_resp.borrow().to_vec()));
     }
 }
 

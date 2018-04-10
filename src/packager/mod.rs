@@ -7,7 +7,7 @@
 mod json_packager;
 mod msgpack_packager;
 
-use bincode::{config,serialize};
+use bincode::{config,serialize,deserialize};
 
 use transport::request::YarRequest;
 use transport::response::YarResponse;
@@ -27,36 +27,44 @@ pub trait Packager {
     fn pack(&self,request:&YarRequest) -> Vec<u8>;
     fn unpack(&self, Vec<u8>) -> YarResponse;
     fn get_name(&self) ->Vec<u8>;
-//    fn encode(&self, request:&YarRequest, body:Vec<u8>)->Vec<u8>{
-//
-//    }
 }
 
-#[derive(Serialize,Debug,Default)]
+#[derive(Serialize,Deserialize,Debug,Default)]
 pub struct YarHeader{
-    pub id:       u32,
-    pub version:  u16,
-    pub magic_num:u32,
-    pub reserved: u32,
+    pub id:       i32,
+    pub version:  i16,
+    pub magic_num:i32,
+    pub reserved: i32,
     pub provider: [u8; 32],
     pub token:    [u8; 32],
-    pub body_len: u32,
+    pub body_len: i32,
 }
 impl YarHeader {
     pub fn get_bytes(&self) -> Vec<u8>{
         config().big_endian().serialize(&self).unwrap()
     }
 }
-#[derive(Serialize,Debug,Default)]
+#[derive(Serialize,Deserialize,Debug,Default)]
 pub struct YarProtocol{
     pub header:YarHeader,
     pub pack_name:[u8;8],
-    pub body:String
+    pub body:Vec<u8>
 }
 
 impl YarProtocol{
     pub fn get_bytes(&self) -> Vec<u8>{
         config().big_endian().serialize(&self).unwrap()
+    }
+    pub fn to_protocol(bytes: Vec<u8>) -> YarProtocol{
+        let bs      = bytes.as_slice();
+
+        let mut ins = YarProtocol{
+            header:config().big_endian().deserialize(&bs[0..82]).unwrap(),
+            pack_name:config().big_endian().deserialize(&bs[82..90]).unwrap(),
+            ..Default::default()
+        };
+        ins.body.extend_from_slice(&bs[90..]);
+        ins
     }
 }
 

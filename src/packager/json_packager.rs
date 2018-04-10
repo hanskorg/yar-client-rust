@@ -12,6 +12,7 @@ struct JsonBody{
     m:String,
     p:Vec<String>
 }
+
 impl Packager for JSONPackager{
 
     fn pack(&self, request: &YarRequest) -> Vec<u8> {
@@ -32,14 +33,12 @@ impl Packager for JSONPackager{
     }
 
     fn unpack(&self, _content:Vec<u8>) -> YarResponse {
-        let json_str = String::from_utf8(_content).unwrap();
-        YarResponse{
-            id: 0,
-            status: String::new(),
-            ret: String::new(),
-            out_put: String::new(),
-            err: String::new(),
-        }
+        //let json_str = String::from_utf8(_content).unwrap();
+        println!("{}",String::from_utf8(_content).unwrap().as_str());
+        let a:YarResponse = YarResponse{i:1,s:2};//serde_json::from_str(String::from_utf8(_content).unwrap().as_str()).unwrap();
+        println!("==={:?}====",a);
+        a
+
     }
     fn get_name(&self) -> Vec<u8>{
         String::from("JSON").into_bytes()
