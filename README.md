@@ -2,8 +2,7 @@
 ## Introduction
     Yar Client for Rust-Lang
 
-[![Build Status](https://travis-ci.org/hanskorg/yar-client-rust.svg?branch=master)
-
+[![Build Status](https://travis-ci.org/hanskorg/yar-client-rust.svg?branch=feature-unpack)](https://travis-ci.org/hanskorg/yar-client-rust)
 # Usage
 Add this to your `Cargo.toml`:
 
