@@ -11,11 +11,15 @@
 ///
 /// When a server response a result, it will send the struct
 ///
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Default, Debug)]
 pub struct YarResponse{
+    #[serde(default)]
     pub i: i32,
     pub s: i32,
-//    pub r: i32,
-//    pub o: String,
-//    pub e: String
+    #[serde(default)]
+    pub r: String,
+    #[serde(default)]
+    pub o: String,
+    #[serde(default)]
+    pub e: String
 }

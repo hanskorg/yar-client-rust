@@ -12,19 +12,18 @@
 
 use packager::{YarHeader,Packager,YarProtocol};
 use Result;
-use std::io::Write;
 
 use std::boxed::Box;
 
 #[derive(Debug)]
 pub struct YarRequest{
-    pub id: u64,
+    pub id: u32,
     pub method: String,
     pub parameters: Vec<String>,
 }
 
 impl YarRequest{
-    pub fn new(id:u64, method:String, parameters:Vec<String> ) -> YarRequest{
+    pub fn new(id:u32, method:String, parameters:Vec<String> ) -> YarRequest{
         YarRequest{
             id,
             method,
@@ -34,24 +33,22 @@ impl YarRequest{
 
     pub fn encode(&self, packager:&Box<Packager>,token:&str, provider:&str )->Result<Vec<u8>>{
         let mut raw_data:Vec<u8> = packager.pack(&self);
-        //println!("==body=={:?}",raw_data);
         let mut protocol = YarProtocol{
             header: self.make_header(raw_data.len() as i32,token, provider),
             pack_name:[0;8],
-            body: raw_data
+            body: None
         };
         protocol.pack_name[0..4].copy_from_slice("JSON".as_bytes());
         let mut  bytes = protocol.get_bytes();
-        //bytes.append(raw_data.as_mut());
-
-        println!("===all=={:?}",bytes);
+        bytes.pop();
+        bytes.append(raw_data.as_mut());
         Ok(bytes)
     }
 
     fn make_header(&self, len:i32, token:&str, provider:&str )->YarHeader{
         let mut yar_header = YarHeader{
-            id:1,
-            version:1,
+            id:self.id as i32,
+            version:10,
             magic_num:0x80DFEC60,
             reserved: 0,
             body_len: len,

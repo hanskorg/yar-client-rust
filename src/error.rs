@@ -33,6 +33,7 @@ impl From<Error> for YarError{
     }
 }
 
+
 impl error::Error for YarError{
     fn description(&self) -> &str {
         match *self {
