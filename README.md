@@ -1,6 +1,7 @@
 # yarclient
 ## Introduction
-    `yar_client` is a crate what can transport info to Yar Server what PHP protocol tool, About Yar see: <https://github.com/laruence/yar>
+   `yar_client` is a crate what can transport info to Yar Server what PHP protocol tool,
+    About Yar see: https://github.com/laruence/yar (https://github.com/laruence/yar)
 
 [![Build Status](https://travis-ci.org/hanskorg/snowflake-rust.svg?branch=master)](https://travis-ci.org/hanskorg/snowflake-rust)
 
@@ -33,7 +34,7 @@ yar_client = "0.1.0"
 ### yar_client::Builder::set_opt(&str) -> Builder;
   use `yar_client::Build` build a new client,need call `*yar_client::Builder::set_url()*`,
   and can call `*set_opt()*` set up some options, this is the list of options:
- - [x] YAR_OPT_PACKAGER :JSON ¡¢MsgPack¡¢PHP , the msg body encoding method.
+ - [x] YAR_OPT_PACKAGER :JSON Â¡Â¢MsgPackÂ¡Â¢PHP , the msg body encoding method.
     **current version only can use JSON**
  - [ ] YAR_OPT_PERSISTENT , curl lib support keep-alive
  - [x] YAR_OPT_TIMEOUT unit second , transport timeout
