@@ -55,7 +55,7 @@ impl YarClient {
     /// Example:
     ///
     ///```rust
-    ///   use yar_client::transport::client::*;
+    ///   use yar_client::*;
     ///   let mut client = Builder::default()
     ///   .set_url("http://10limi.com/rpc.php").unwrap()
     ///   .set_opt(YAR_OPT_PACKAGER,"JSON").unwrap()
@@ -142,7 +142,7 @@ impl <'a>Builder{
     ///Build a new YarClient ,Transport with curl
     ///```rust
     ///  use yar_client::Builder;
-    ///  use yar_client::transport::client::YAR_OPT_PACKAGER;
+    ///  use yar_client::YAR_OPT_PACKAGER;
     ///
     ///  Builder::default()
     ///  .set_url("http://10limi.com/rpc.php").unwrap()
