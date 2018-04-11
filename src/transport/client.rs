@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use transport::{YarRequest,YarResponse};
+use transport::{YarRequest};
 use packager::MsgPackPackager;
 use packager::JSONPackager;
 use packager::Packager;
@@ -66,8 +66,8 @@ impl YarClient {
     ///    let a = client.call("test",vec!["1".to_string(),"2".to_string()]);
     ///```
     ///
-    pub fn call(&mut self,fn_name:&str, parameters:Vec<String>)->Result<YarResponse> {
-        let req_id = self.snow_flake_id.generate_id().unwrap() >> 32 ;
+    pub fn call(&mut self,fn_name:&str, parameters:Vec<String>)->Result<String> {
+        let req_id = self.snow_flake_id.generate_id().unwrap() & 0x0000FFFF ;
         let request  = YarRequest::new(req_id as u32, fn_name.to_string(), parameters.clone());
         let post_raw:Vec<u8> = request.encode( &self.packager, self.token.as_ref(), self.provider.as_ref())?;
         let resp_raw:RefCell<Vec<u8>>  = RefCell::new(Vec::new());
@@ -87,7 +87,14 @@ impl YarClient {
         })?;
         transfer.perform()?;
         let protocol = YarProtocol::to_protocol(resp_raw.borrow().to_vec());
-        Ok(self.packager.unpack(protocol.body.unwrap()))
+        let resp = self.packager.unpack(protocol.body.unwrap());
+        String::from("111");
+        match resp.s {
+            0 => Ok(resp.r),
+            _ => {
+                Err(YarError::CallErr(format!("code: {}, msg: {}, output: {}", resp.s, resp.e, resp.o)))
+            }
+        }
     }
 }
 

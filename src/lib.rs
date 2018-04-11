@@ -21,7 +21,8 @@
 //! .set_token("token")
 //! .set_provider("org.hansk.net.yarclient")
 //! .build().unwrap();
-//! let ret = client.call("test", vec!["1".to_string(), "2".to_string()]).unwrap();
+//! let ret = client.call("test", vec!["1".to_string(), "2".to_string()]);
+//! println!("{:?}",ret);
 //! ```
 //!# Builder
 //!  use `yar_client::Build` build a new client,need call `*yar_client::Builder::set_url()*`,
@@ -67,12 +68,33 @@ mod test {
     use YAR_OPT_TIMEOUT;
     #[test]
     fn test_builder() {
+        let client = Builder::default()
+            .set_url("http://10limi.com/rpc.php").unwrap()
+            .set_opt(YAR_OPT_PACKAGER, "JSON").unwrap()
+            .set_opt(YAR_OPT_CONNECT_TIMEOUT, 1).unwrap()
+            .set_opt(YAR_OPT_TIMEOUT, 30).unwrap()
+            .build();
+        match client {
+            Ok(mut client) => {
+                let ret = client.call("test", vec!["1".to_string(), "2".to_string()]).unwrap();
+                assert_eq!(ret, "1");
+            },
+            Err(err) => {
+                println!("error occur! {:?} ", err)
+            }
+        }
+    }
+
+    #[test]
+    fn test_no_method() {
         let mut client = Builder::default()
             .set_url("http://10limi.com/rpc.php").unwrap()
             .set_opt(YAR_OPT_PACKAGER, "JSON").unwrap()
             .set_opt(YAR_OPT_CONNECT_TIMEOUT, 1).unwrap()
             .set_opt(YAR_OPT_TIMEOUT, 30).unwrap()
             .build().unwrap();
-        let a = client.call("test", vec!["1".to_string(), "2".to_string()]);
+        let a = client.call("test1", vec!["1".to_string(), "2".to_string()]);
+        assert!(a.is_err(),"yar method not exist!");
     }
+
 }

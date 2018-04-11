@@ -19,6 +19,8 @@ pub enum YarError {
     /// The underlying error is num::ParseIntError.
     TimeError(ParseIntError),
     CURLError(Error),
+    /// remote call error
+    CallErr(String),
 }
 
 impl From<ParseIntError> for YarError{
@@ -39,7 +41,8 @@ impl error::Error for YarError{
         match *self {
             YarError::TimeError(ref err) => err.description(),
             YarError::CURLError(ref err) => err.description(),
-            YarError::URLError(description) => description
+            YarError::URLError(description)=> description,
+            YarError::CallErr(ref description) => description.as_str(),
         }
     }
 
@@ -48,6 +51,7 @@ impl error::Error for YarError{
             YarError::URLError(_) => None,
             YarError::TimeError(ref err)=> Some(err as &error::Error),
             YarError::CURLError(ref err)=> Some(err as &error::Error),
+            YarError::CallErr(_)=> None,
         }
     }
 }
@@ -60,6 +64,7 @@ impl fmt::Display for YarError{
             YarError::TimeError(ref err) => fmt::Display::fmt(err, f),
             YarError::CURLError(ref err) => fmt::Display::fmt(err, f),
             YarError::URLError(desc) => f.write_str(desc),
+            YarError::CallErr(ref desc) => f.write_str(desc.as_str()),
         }
     }
 }

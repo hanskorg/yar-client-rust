@@ -1,6 +1,6 @@
 [package]
 name = "yar_client"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["guohao <guohao@panda.tv>"]
 repository = "https://github.com/hanskorg/yar-client-rust.git"
 homepage = "https://github.com/hanskorg/yar-client-rust.git"

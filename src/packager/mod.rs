@@ -32,6 +32,7 @@ pub struct YarHeader{
     pub body_len: i32,
 }
 impl YarHeader {
+    #[allow(dead_code)]
     pub fn get_bytes(&self) -> Vec<u8>{
         config().big_endian().serialize(&self).unwrap()
     }
@@ -44,10 +45,10 @@ pub struct YarProtocol{
 }
 impl YarProtocol{
 
-    #[allow(dead_code)]
     pub fn get_bytes(&self) -> Vec<u8>{
         config().big_endian().serialize(&self).unwrap()
     }
+
     pub fn to_protocol(bytes: Vec<u8>) -> YarProtocol{
         let bs      = bytes.as_slice();
 

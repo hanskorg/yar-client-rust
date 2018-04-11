@@ -12,5 +12,5 @@ fn main() {
         .set_provider("org.hansk.net.yarclient")
         .build().unwrap();
     let ret = client.call("test", vec!["1".to_string(), "2".to_string()]).unwrap();
-    assert_eq!(ret.r,"1");
+    assert_eq!(ret,"1");
 }
