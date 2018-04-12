@@ -1,9 +1,10 @@
 # yarclient
 ## Introduction
-    `yar_client` is a crate what can transport info to Yar Server what PHP protocol tool, About Yar see: <https://github.com/laruence/yar>
+    `yar_client` is a crate what can transport info to Yar Server what PHP protocol tool,
+    More about Yar see: <https://github.com/laruence/yar>
 
 [![Build Status](https://travis-ci.org/hanskorg/yar-client-rust.svg?branch=master)](https://travis-ci.org/hanskorg/yar-client-rust)
-
+![Build Status](https://img.shields.io/crates/v/yar_client.svg)
 ## Usage
 Add this to your `Cargo.toml`:
 
