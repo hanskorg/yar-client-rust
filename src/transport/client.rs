@@ -67,14 +67,14 @@ impl YarClient {
     ///```
     ///
     pub fn call(&mut self,fn_name:&str, parameters:Vec<String>)->Result<String> {
-        let req_id = self.snow_flake_id.generate_id().unwrap() & 0x0000FFFF ;
+        let req_id = self.snow_flake_id.generate_id().unwrap() & 0xFFFFFFF ;
         let request  = YarRequest::new(req_id as u32, fn_name.to_string(), parameters.clone());
         let post_raw:Vec<u8> = request.encode( &self.packager, self.token.as_ref(), self.provider.as_ref())?;
         let resp_raw:RefCell<Vec<u8>>  = RefCell::new(Vec::new());
         self.curl_client.post(true)?;
         self.curl_client.post_field_size(post_raw.len() as u64)?;
-
-        let mut transfer = self.curl_client.transfer();
+        
+	let mut transfer = self.curl_client.transfer();
 
         transfer.read_function(|buf| {
             let a = post_raw.as_slice().read(buf).unwrap_or(0);
@@ -83,10 +83,11 @@ impl YarClient {
 
         transfer.write_function( |data|  {
             resp_raw.borrow_mut().extend_from_slice(data);
-            Ok(data.len())
+	    Ok(data.len())
         })?;
         transfer.perform()?;
-        let protocol = YarProtocol::to_protocol(resp_raw.borrow().to_vec());
+        
+	let protocol = YarProtocol::to_protocol(resp_raw.borrow().to_vec());
         let resp = self.packager.unpack(protocol.body.unwrap());
         String::from("111");
         match resp.s {
