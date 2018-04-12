@@ -76,8 +76,11 @@ mod test {
             .build();
         match client {
             Ok(mut client) => {
-                let ret = client.call("test", vec!["1".to_string(), "2".to_string()]).unwrap();
-                assert_eq!(ret, "1");
+                let ret = client.call("test", vec!["1".to_string(), "2".to_string()]);
+                match ret {
+                    Ok(ret) => assert_eq!(ret, "1"),
+                    Err(err) => println!("error occur! {:?} ", err)
+                }
             },
             Err(err) => {
                 println!("error occur! {:?} ", err)
